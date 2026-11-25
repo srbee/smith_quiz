@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Smith Chart Quiz</title>
+<style>
+:root{--bg:#e8f1ee;--card:#f6faf8;--ink:#12303a;--mute:#4f6b72;--line:#9bbcb8;--acc:#0f5c6e;--ok:#1b7a43;--okbg:#d5eede;--bad:#b3261e;--badbg:#f8dcd9;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1e22;--card:#172a30;--ink:#e3efec;--mute:#93b0b3;--line:#335259;--acc:#6cc4d6;--ok:#7fd69f;--okbg:#17382a;--bad:#ff9a92;--badbg:#3d1c1a}}
+:root[data-theme="dark"]{--bg:#0f1e22;--card:#172a30;--ink:#e3efec;--mute:#93b0b3;--line:#335259;--acc:#6cc4d6;--ok:#7fd69f;--okbg:#17382a;--bad:#ff9a92;--badbg:#3d1c1a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:640px;margin:0 auto;padding:20px 16px 40px}
+header{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+header svg{width:72px;height:72px;flex:none}
+h1{font:600 26px/1.15 Georgia,"Iowan Old Style",serif;margin:0}
+.sub{color:var(--mute);font-size:14px;margin:2px 0 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.q{font:500 20px/1.4 Georgia,"Iowan Old Style",serif;margin:0 0 16px}
+.opts{display:grid;gap:10px}
+.opt{display:flex;gap:12px;align-items:center;text-align:left;width:100%;padding:10px 18px 10px 16px;border:2px solid var(--ink);border-radius:36px;background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.rd{flex:none;width:28px;height:28px;border:2px solid var(--ink);border-radius:50%;display:grid;place-items:center}
+.rd::after{content:"";width:12px;height:12px;border-radius:50%;background:var(--ink);transform:scale(0);transition:transform .15s}
+.opt.sel .rd::after{transform:scale(1)}
+.opt.hint{background:#ffe94d;border-color:#8a7500;color:#2b2500}
+.opt.hint b,.opt.hint .rd{color:#2b2500;border-color:#2b2500}
+.opt.hint .rd::after{background:#2b2500}
+.opt:hover:not(:disabled){border-color:var(--acc)}
+.opt:focus-visible,.next:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.opt b{flex:none;width:22px;color:var(--acc);font:700 19px Georgia,serif}
+.opt:disabled{cursor:default}
+.opt.ok{background:var(--okbg);border-color:var(--ok)}
+.opt.bad{background:var(--badbg);border-color:var(--bad)}
+.exp{margin:14px 0 0;padding:12px 14px;border-left:4px solid var(--acc);background:var(--bg);border-radius:0 8px 8px 0;font-size:15px}
+.bar{display:flex;justify-content:space-between;color:var(--mute);font-size:14px;margin-bottom:10px}
+.next{margin-top:16px;padding:11px 20px;border:0;border-radius:10px;background:var(--acc);color:var(--bg);font:600 16px system-ui,sans-serif;cursor:pointer}
+.score{font:600 56px/1 Georgia,serif;margin:6px 0}
+.hide{display:none}
+body{background:linear-gradient(165deg,#ffe3ec 0%,#e0ecff 50%,#dcf7ee 100%) fixed}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) body{background:linear-gradient(165deg,#2a1636 0%,#10223f 50%,#0d2e2a 100%) fixed}}
+:root[data-theme="dark"] body{background:linear-gradient(165deg,#2a1636 0%,#10223f 50%,#0d2e2a 100%) fixed}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:#4c2fb8}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;margin:-20px -16px 16px;padding:10px 16px;background:#4c2fb8;color:#fff;border-radius:0 0 20px 20px;box-shadow:0 4px 14px rgba(40,20,100,.35)}
+header #mini{width:112px;height:88px}
+header .sub{color:#d9d2ff}
+.card{border-top:7px solid var(--qc,#8b5cf6)}
+.bar span:first-child{color:var(--qc);font-weight:700}
+.opt:nth-child(1){--c:#e8590c}.opt:nth-child(2){--c:#c78200}.opt:nth-child(3){--c:#12a58f}.opt:nth-child(4){--c:#8b5cf6}
+.opt{border-color:var(--c)}.opt b{color:var(--c)}.rd{border-color:var(--c)}.rd::after{background:var(--c)}
+#quiz .next{background:var(--qc);color:#111}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.next.alt{background:transparent;color:var(--ink);border:2px solid var(--ink)}
+</style>
+</head>
+<body>
+<main>
+<header>
+<svg id="mini" viewBox="-14 0 128 100" aria-hidden="true"></svg>
+<svg style="display:none" viewBox="0 0 80 80" aria-hidden="true">
+<g fill="none" stroke="var(--line)" stroke-width="1.2">
+<circle cx="40" cy="40" r="36"/><line x1="4" y1="40" x2="76" y2="40"/>
+<circle cx="58" cy="40" r="18"/><circle cx="49" cy="40" r="27"/>
+<path d="M76 40A36 36 0 0 0 40 4M76 40A36 36 0 0 1 40 76M58 40A18 18 0 0 0 76 22"/>
+</g>
+<circle id="dot" r="4.5" fill="var(--acc)" cx="76" cy="40"/>
+</svg>
+<div><h1>Smith chart quiz</h1><p class="sub">20 questions. The pink dot tracks your progress.</p></div>
+</header>
+<section class="card" id="quiz">
+<div class="bar"><span id="num"></span><span id="sc"></span></div>
+<p class="q" id="q"></p>
+<div class="opts" id="opts"></div>
+<p class="exp hide" id="exp" role="status"></p>
+<button class="next hide" id="next"></button>
+</section>
+<section class="card hide" id="pause">
+<p class="sub">Checkpoint</p>
+<div class="score" id="psc"></div>
+<p id="pmsg"></p>
+<div class="row"><button class="next" id="go">Continue</button><button class="next alt" id="quit">Quit and see score</button></div>
+</section>
+<section class="card hide" id="end">
+<p class="sub">Your score</p>
+<div class="score" id="final"></div>
+<p id="msg"></p>
+<button class="next" id="again">Try again</button>
+</section>
+</main>
+<script>
+var Q=[
+{q:"What does the centre of the Smith chart represent?",o:["Short circuit, z = 0","Matched load, z = 1 + j0 (Γ = 0)","Open circuit, z = ∞","Pure inductance of j1"],c:1,e:"The centre is the normalized impedance 1 + j0. The load equals the line’s characteristic impedance, so the reflection coefficient is zero."},
+{q:"A load whose impedance lies on the outer circle of the chart (|Γ| = 1) is:",o:["Perfectly matched","Purely resistive with r = 1","Purely reactive, so all power is reflected","A resistor with a small loss"],c:2,e:"The outer circle is r = 0. A purely reactive load absorbs no power, so |Γ| = 1 and the standing-wave ratio is infinite."},
+{q:"Where is a short circuit (z = 0) plotted?",o:["Leftmost point of the horizontal axis","Centre of the chart","Top of the outer circle","Rightmost point of the horizontal axis"],c:0,e:"A short gives Γ = −1, which is the leftmost point on the real axis."},
+{q:"Where is an open circuit (z = ∞) plotted?",o:["Bottom of the outer circle","Centre of the chart","Leftmost point of the horizontal axis","Rightmost point of the horizontal axis"],c:3,e:"An open circuit gives Γ = +1, the rightmost point where all the r and x circles meet."},
+{q:"Which part of the chart shows impedances with inductive reactance (+jx)?",o:["Lower half","Upper half","Only the horizontal axis","Only the centre"],c:1,e:"Positive reactance (inductive) is in the upper half. Capacitive reactance is in the lower half."},
+{q:"Moving from the load toward the generator along a lossless line, you move:",o:["Clockwise on a circle of constant |Γ|","Anticlockwise on a circle of constant |Γ|","Along a constant-resistance circle","Straight toward the centre"],c:0,e:"Toward the generator is clockwise (marked ‘wavelengths toward generator’). The magnitude of Γ stays constant on a lossless line."},
+{q:"One full revolution around the Smith chart corresponds to what length of line?",o:["λ/4","λ","λ/2","2λ"],c:2,e:"Γ rotates by 2βl, so a full 360° turn needs βl = π, which is l = λ/2."},
+{q:"A load has |Γ| = 0.5. What is the VSWR?",o:["1.5","2","2.5","3"],c:3,e:"VSWR = (1 + |Γ|)/(1 − |Γ|) = 1.5/0.5 = 3. This is also the value of r where the constant-|Γ| circle crosses the right-hand real axis."},
+{q:"How do you find the normalized admittance y from a normalized impedance z on the chart?",o:["Reflect the point across the horizontal axis","Rotate the point 180° about the centre (λ/4 of line)","Move the point to the outer circle","Swap the r and x values"],c:1,e:"y = 1/z. For normalized values, a quarter-wave transformation gives the inverse, which is a 180° rotation about the centre."},
+{q:"All constant-resistance circles pass through which point?",o:["Rightmost point (r = ∞, x = ∞)","Leftmost point (r = 0)","Centre of the chart","Top of the outer circle"],c:0,e:"Every r circle is tangent to the outer circle at the rightmost point, the open-circuit point."},
+{q:"Where is the normalized impedance z = 0.5 + j0 plotted?",o:["At the centre of the chart","At the rightmost point","On the real axis, left of centre (Γ = −1/3)","On the real axis, right of centre (Γ = +1/3)"],c:2,e:"Γ = (z − 1)/(z + 1) = −0.5/1.5 = −1/3. Resistances below 1 lie on the real axis to the left of the centre."},
+{q:"A 100 Ω resistive load is connected to a 50 Ω line. What is the VSWR?",o:["0.5","2","1","4"],c:1,e:"z = 100/50 = 2, which sits on the right half of the real axis. There, VSWR equals the value of r, so VSWR = 2."},
+{q:"Why is impedance normalized (z = Z/Z₀) before plotting on the Smith chart?",o:["To make all loads purely resistive","To remove the reactance","To make the line lossless","So one chart works for any characteristic impedance"],c:3,e:"After dividing by Z₀, a 50 Ω line and a 75 Ω line share the same chart, and the centre always means a match."},
+{q:"You add a series inductor to a load. On the chart, the point moves:",o:["Clockwise along its constant-resistance circle","Anticlockwise along its constant-resistance circle","Along a constant-|Γ| circle","Straight to the centre"],c:0,e:"A series element changes only the reactance, so the resistance stays fixed. An inductor adds +jx, which moves the point clockwise toward the upper half. A series capacitor moves it anticlockwise."},
+{q:"Adding a shunt reactive element changes the normalized admittance while keeping which quantity constant?",o:["Susceptance","Resistance","Conductance","|Γ|"],c:2,e:"Shunt elements add admittance, so only the susceptance changes. The conductance g stays fixed, so you move along a constant-conductance circle on the admittance chart."},
+{q:"A constant-VSWR circle shrinks to a single point at the centre. What is the VSWR there?",o:["0","0.5","∞","1"],c:3,e:"At the centre |Γ| = 0, so VSWR = (1 + 0)/(1 − 0) = 1, which is a perfect match."},
+{q:"At a voltage maximum on a lossless line, the normalized impedance is:",o:["Purely imaginary","Purely real, equal to the VSWR","Purely real, equal to 1/VSWR","Zero"],c:1,e:"Voltage maxima fall where the constant-|Γ| circle crosses the right real axis. The impedance there is real, with r = VSWR. At voltage minima it is on the left axis, with r = 1/VSWR."},
+{q:"A half-wave (λ/2) line is terminated in a load Z_L. The input impedance is:",o:["Z_L itself","Z₀²/Z_L","Always an open circuit","Always Z₀"],c:0,e:"λ/2 is one full lap around the chart, so you return to the starting point. A half-wave line repeats the load impedance."},
+{q:"In single-stub matching, the stub is connected where the normalized admittance has a real part (conductance) equal to:",o:["0","0.5","1","∞"],c:2,e:"You move along the line to the point where y = 1 ± jb. The stub then cancels the ±jb and the result is y = 1, the centre of the chart."},
+{q:"Where is the normalized impedance z = 0 + j1 plotted?",o:["Bottom of the outer circle","Top of the outer circle (Γ = +j)","Centre of the chart","Leftmost point"],c:1,e:"With r = 0 it lies on the outer circle. Positive reactance puts it in the upper half, and x = 1 gives Γ = (j − 1)/(j + 1) = +j, which is the top."}
+];
+var i=0,score=0,done=false,L="ABCD";
+var $=function(id){return document.getElementById(id)};
+function show(){
+done=false;var d=Q[i];
+$("num").textContent="Question "+(i+1)+" of "+Q.length;
+$("quiz").style.setProperty("--qc",["#e8590c","#c78200","#12a58f","#8b5cf6","#2f80ed"][i%5]);
+$("sc").textContent="Score "+score;
+$("q").textContent=d.q;
+$("exp").className="exp hide";$("next").className="next hide";
+var box=$("opts");box.innerHTML="";
+d.o.forEach(function(t,k){
+var b=document.createElement("button");b.className="opt";
+b.innerHTML="<b>"+L[k]+"</b><i class='rd'></i><span></span>";b.lastChild.textContent=t;
+b.onclick=function(){pick(k)};box.appendChild(b);});
+mv(i/Q.length);
+}
+(function(){var h='<defs><clipPath id="cp"><circle cx="50" cy="50" r="46"/></clipPath></defs><circle cx="50" cy="50" r="46" fill="#fffdf5"/><g clip-path="url(#cp)" fill="none" stroke-width="1">';
+[0.2,0.5,1,2,5].forEach(function(r){h+='<circle cx="'+(50+46*r/(1+r))+'" cy="50" r="'+46/(1+r)+'" stroke="#2f80ed"/>';});
+[0.5,1,2,5].forEach(function(x){[x,-x].forEach(function(v){h+='<circle cx="96" cy="'+(50-46/v)+'" r="'+46/Math.abs(v)+'" stroke="#e8590c"/>';});});
+h+='<line x1="4" y1="50" x2="96" y2="50" stroke="#777"/></g><circle cx="50" cy="50" r="46" fill="none" stroke="#8b5cf6" stroke-width="2"/>';
+h+='<g font-size="9" font-weight="700" font-family="system-ui,sans-serif"><text x="-13" y="53" fill="#fff">SC</text><text x="99" y="53" fill="#fff">OC</text><text x="50" y="19" text-anchor="middle" fill="#e8590c">+jX</text><text x="50" y="86" text-anchor="middle" fill="#e8590c">−jX</text></g><circle cx="50" cy="50" r="2.8" fill="#12a58f"/><circle id="pd" r="4.5" cx="96" cy="50" fill="#ff3d71" stroke="#fff" stroke-width="1.5"/>';
+$("mini").innerHTML=h;})();
+function mv(p){var a=p*2*Math.PI,d=$("pd");d.setAttribute("cx",(50+46*Math.cos(a)).toFixed(1));d.setAttribute("cy",(50+46*Math.sin(a)).toFixed(1));}
+var AC,U=0.08;function morse(seq){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();var t=AC.currentTime+0.02;seq.forEach(function(s){if(s<0){t+=-s*U;return;}var o=AC.createOscillator(),g=AC.createGain(),d=s*U;o.frequency.value=650;o.connect(g);g.connect(AC.destination);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.2,t+0.005);g.gain.setValueAtTime(0.2,t+d-0.005);g.gain.linearRampToValueAtTime(0,t+d);o.start(t);o.stop(t+d);t+=d+U;});}catch(e){}}
+function pick(k){
+if(done)return;done=true;var d=Q[i],bs=$("opts").children;
+for(var j=0;j<bs.length;j++){bs[j].disabled=true;}
+bs[k].classList.add("sel");
+if(k===d.c){score++;bs[k].classList.add("ok");morse([1,3,1]);}else{bs[k].classList.add("bad");bs[d.c].classList.add("hint");morse([1,-2,1,-2,1,-2,1,-2,1]);}
+$("sc").textContent="Score "+score;
+$("exp").textContent=(k===d.c?"Correct. ":"Not quite. ")+d.e;
+$("exp").className="exp";
+$("next").textContent=i===Q.length-1?"See score":"Next question";
+$("next").className="next";
+mv((i+1)/Q.length);
+}
+$("next").onclick=function(){
+i++;
+if(i<Q.length&&i%5===0){$("quiz").className="card hide";$("pause").className="card";$("psc").textContent=score+" / "+i;$("pmsg").textContent="You have finished "+i+" of "+Q.length+" questions. Continue or quit here?";mv(i/Q.length);}else if(i>=Q.length){fin();}else{show();}
+};
+function fin(){
+$("quiz").className="card hide";$("pause").className="card hide";$("end").className="card";
+$("final").textContent=score+" / "+i;
+$("msg").textContent=score>=0.9*i?"Excellent. You read the chart fluently.":score>=0.6*i?"Good. Review the questions you missed and try again.":"Keep practising. Start with the centre, the axis end-points and the direction of rotation.";
+}
+$("go").onclick=function(){$("pause").className="card hide";$("quiz").className="card";show();};
+$("quit").onclick=fin;
+$("again").onclick=function(){i=0;score=0;$("end").className="card hide";$("quiz").className="card";show();};
+show();
+</script>
+</body>
+</html>
